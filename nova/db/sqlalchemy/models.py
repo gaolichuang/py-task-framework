@@ -96,3 +96,7 @@ class Instance(BASE, NovaBase):
 
     #some android own info
     verdor = Column(String(64))
+
+    # which node incharge this instances
+    # host is hostname, use send rpc msg
+    host = Column(String(64))

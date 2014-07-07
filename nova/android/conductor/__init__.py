@@ -23,6 +23,10 @@ class PluginAPI(object):
     def android_get_all_by_name(self, context, name):
         return self.manager.android_get_all_by_name(context,name=name)
 
+    def android_get_by_uid(self, context, uuid):
+        return self.manager.android_get_by_uid(context,uuid=uuid)
+
+
     def android_create(self, context, values):
         return self.manager.android_create(context,values=values)
 
@@ -46,6 +50,10 @@ class RpcApiPlugin(plugin.BaseRpcApi):
     def android_get_all_by_name(self, context, name):
         cctxt = self.client.prepare(version='1.0')
         return cctxt.call(context, 'android_get_all_by_name', name=name)
+
+    def android_get_by_uid(self, context, uuid):
+        cctxt = self.client.prepare(version='1.0')
+        return cctxt.call(context, 'android_get_by_uid', uuid=uuid)
 
     def android_create(self, context, values):
         cctxt = self.client.prepare(version='1.0')
@@ -74,6 +82,10 @@ class ConductorManagerPlugin(plugin.BaseConductor):
         result = self.db.android_get_by_name(context, name)
         return jsonutils.to_primitive(result)
 
+    def android_get_by_uid(self, context, uuid):
+        result = self.db.android_get_by_uid(context, uuid)
+        return jsonutils.to_primitive(result)
+
     def android_create(self, context, values):
         result = self.db.android_create(context, values)
         return jsonutils.to_primitive(result)
@@ -86,3 +98,4 @@ class ConductorManagerPlugin(plugin.BaseConductor):
     def android_update(self, context, uuid, values):
         result = self.db.android_update(context, uuid, values)
         return result
+    

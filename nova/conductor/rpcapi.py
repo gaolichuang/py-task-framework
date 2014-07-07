@@ -55,7 +55,7 @@ class ConductorAPI(rpcclient.RpcProxy):
         return getattr(plugin, key)
 
     def service_get_all_by(self, context, topic=None, host=None, binary=None):
-        cctxt = self.client.prepare(version='1.28')
+        cctxt = self.client.prepare(version='1.0')
         return cctxt.call(context, 'service_get_all_by',
                           topic=topic, host=host, binary=binary)
 
