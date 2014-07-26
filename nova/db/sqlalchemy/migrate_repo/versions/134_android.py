@@ -57,6 +57,7 @@ def upgrade(migrate_engine):
         Column('uuid', String(length=36)),
         Column('progress', Integer),
         Column('verdor', String(length=64)),
+        Column('host', String(length=64)),
         mysql_engine='InnoDB',
         mysql_charset='utf8'
     )
