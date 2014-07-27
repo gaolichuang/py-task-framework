@@ -56,7 +56,7 @@ from nova import conductor
 LOG = logging.getLogger(__name__)
 
 
-def check_instance_state(vm_state=None, task_state=(None,),
+def check_instance_state(android_state=None, task_state=(None,),
                          must_have_launched=True):
     """Decorator to check VM and/or task state before entry to API functions.
 
@@ -64,15 +64,14 @@ def check_instance_state(vm_state=None, task_state=(None,),
     started at least once the wrapper will raise an exception.
     """
 
-    if vm_state is not None and not isinstance(vm_state, set):
-        vm_state = set(vm_state)
+    if android_state is not None and not isinstance(android_state, set):
+        android_state = set(android_state)
     if task_state is not None and not isinstance(task_state, set):
         task_state = set(task_state)
-
     def outer(f):
         @functools.wraps(f)
         def inner(self, context, instance, *args, **kw):
-            if vm_state is not None and instance['vm_state'] not in vm_state:
+            if android_state is not None and instance['android_state'] not in android_state:
                 raise exception.InstanceInvalidState(
                     attr='android_state',
                     instance_uuid=instance['uuid'],
@@ -90,7 +89,7 @@ def check_instance_state(vm_state=None, task_state=(None,),
                     attr=None,
                     not_launched=True,
                     instance_uuid=instance['uuid'],
-                    state=instance['vm_state'],
+                    state=instance['android_state'],
                     method=f.__name__)
 
             return f(self, context, instance, *args, **kw)
@@ -111,10 +110,10 @@ class API(object):
         # NOTE(ameade): we still need to support integer ids for ec2
         try:
             if uuidutils.is_uuid_like(instance_id):
+                instance = self.conductor.android_get_by_uid(context, instance_id)
+            elif utils.is_int_like(instance_id):
                 ## TODO: not support search by id
                 raise exception.AndroidNotFound(uuid=instance_id) 
-            elif utils.is_int_like(instance_id):
-                instance = self.conductor.android_get_by_uid(context, instance_id)
             else:
                 raise exception.AndroidNotFound(uuid=instance_id)
         except exception.AndroidNotFound:
@@ -127,28 +126,29 @@ class API(object):
         instances['verdor'] = verdor
         return self._rpcapi.create_android(context,instances)
 
-    @check_instance_state(vm_state=[rb_status.READY],
+    @check_instance_state(android_state=[rb_status.READY],
                           task_state=None)
     def active(self, context, instance):
         self._rpcapi.active_android(context, instance)
 
-    @check_instance_state(vm_state=[rb_status.ACTIVE,rb_status.WORKING],
+    @check_instance_state(android_state=[rb_status.ACTIVE,rb_status.WORKING],
                           task_state=None)
     def deactive(self, context, instance):
         self._rpcapi.deactive_android(context, instance)
 
-    @check_instance_state(vm_state=[rb_status.ACTIVE],
+    @check_instance_state(android_state=[rb_status.ACTIVE],
                           task_state=None)
     def start(self, context, instance):
         self._rpcapi.start_android(context, instance)
 
-    @check_instance_state(vm_state=[rb_status.WORKING],
+    @check_instance_state(android_state=[rb_status.WORKING],
                           task_state=None)
     def stop(self, context, instance):
         self._rpcapi.stop_android(context, instance)
 
-    @check_instance_state(vm_state=[rb_status.WORKING,rb_status.ACTIVE,rb_status.READY],
-                          task_state=[task_status.DEACTIVING,task_status.STARTING,
-                                      task_status.STOPING])
+    @check_instance_state(android_state=[None,rb_status.WORKING,rb_status.ACTIVE,rb_status.READY],
+                          task_state=[None,task_status.DEACTIVING,task_status.STARTING,
+                                      task_status.STOPING],
+                          must_have_launched = False)
     def destroy(self, context, instance):
         self._rpcapi.destroy_android(context, instance)

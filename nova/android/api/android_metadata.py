@@ -124,9 +124,9 @@ class AndroidController(object):
 
 
 class Androids(extensions.V3APIExtensionBase):
-    """Services support."""
+    """Android metdata service."""
 
-    name = "Androids"
+    name = "AndroidsMetadata"
     alias = ALIAS
     namespace = "http://docs.openstack.org/compute/ext/services/api/v3"
     version = 1

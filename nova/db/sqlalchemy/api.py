@@ -490,7 +490,8 @@ def android_create(context, values):
         values['project_id'] = context.project_id
     if not values.get('user_id'):
         values['user_id'] = context.user_id
-
+    if 'display_name' not in values.keys():
+        values['display_name'] = values['name']
     instance_ref = models.Instance()
     instance_ref.update(values)
     session = get_session()
@@ -500,6 +501,8 @@ def android_create(context, values):
 
 @require_admin_context
 def android_update(context, uuid, values):
+    if 'display_name' not in values.keys():
+        values['display_name'] = values['name']
     session = get_session()
     with session.begin():
         instance_ref = _android_instance_get(context, uuid, session=session)

@@ -53,7 +53,7 @@ class AndroidAPI(rpcclient.RpcProxy):
     def __init__(self,plugin_class_name=None):
 
         super(AndroidAPI, self).__init__(
-            topic=CONF.sample.topic,
+            topic=CONF.android.topic,
             default_version=self.BASE_RPC_API_VERSION,
             serializer=objects_base.NovaObjectSerializer())
         self.client = self.get_client()

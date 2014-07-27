@@ -28,7 +28,7 @@ from nova import db as db_api
 from nova.android import agent as android_api
 from nova.openstack.common import jsonutils
 from nova.openstack.common import log as logging
-
+from nova.api.openstack.wsgi import Controller as wsgi_controller
 ALIAS = "androids-plant"
 CONF = cfg.CONF
 
@@ -54,7 +54,7 @@ class AndroidShowTemplate(xmlutil.TemplateBuilder):
 class AndroidExtendController(wsgi.Controller):
     def __init__(self):
         self._android_api = android_api.API()
-        super(ServiceExtendController, self).__init__() 
+        super(AndroidExtendController, self).__init__() 
 
     @wsgi.serializers(xml=AndroidShowTemplate)
     @wsgi.response(201)
@@ -105,16 +105,23 @@ class AndroidController(object):
         self._android_api = android_api.API()
 
     @wsgi.serializers(xml=AndroidShowTemplate)
-    @wsgi.response(201)
+    @extensions.expected_errors((400, 409))
     def create(self, req, body):
         LOG.debug(_("Service create fuction body %s"%body))
-        name = body.get('name',None)
-        verdor = body.get('verdor',None)
+        if not wsgi_controller.is_valid_body(body, 'android'):
+            raise webob.exc.HTTPBadRequest('Invalid request body ')
+        vals = body['android']
+        name = vals.get('name',None)
+        verdor = vals.get('verdor',None)
+        if name == None or verdor == None:
+            raise webob.exc.HTTPBadRequest('Invalid request body not set name or verdor')
         context = req.environ['nova.context']
+        LOG.debug(_("get name and verdor  %s %s" % (name,verdor)))
+
         service = self._android_api.create(context, name = name, verdor =verdor)
-        LOG.debug(_("Service create  %s"%service))
-        
-        return {'service':service}
+        LOG.debug(_("android create  %s"%service))
+
+        return {'android':service}
 
 
     @wsgi.serializers(xml=AndroidShowTemplate)
@@ -124,7 +131,7 @@ class AndroidController(object):
         context = req.environ['nova.context']
         try:
             instance = {}
-            instance['uuid'] = id
+            instance = self._android_api.get(context,id)
             self._android_api.destroy(context,instance)
         except exception.AndroidNotFound as e:
             raise webob.exc.HTTPNotFound(explanation=e.format_message())
@@ -132,9 +139,9 @@ class AndroidController(object):
 
 
 class Androids(extensions.V3APIExtensionBase):
-    """Services support."""
+    """Android control service."""
 
-    name = "Services"
+    name = "AndroidsPlant"
     alias = ALIAS
     namespace = "http://docs.openstack.org/compute/ext/services/api/v3"
     version = 1

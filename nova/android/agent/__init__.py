@@ -1,6 +1,6 @@
 
 from oslo.config import cfg
-from nova.android import api as android_api
+from nova.android.agent import api as android_api
 
 CONF = cfg.CONF
 
