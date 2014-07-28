@@ -61,43 +61,52 @@ class AndroidExtendController(wsgi.Controller):
     @wsgi.action('active')
     def active(self, req, id, body):
         context = req.environ['nova.context']
-        instance = {}
-        instance['uuid'] = id
-        self._android_api.active(context, instance)
-        return {'service':'not implement  custom...id %s body %s'%(id, body)}
+        try:
+            instance = {}
+            instance = self._android_api.get(context,id)
+            self._android_api.active(context, instance)
+        except exception.AndroidNotFound as e:
+            raise webob.exc.HTTPNotFound(explanation=e.format_message())
+        return {'android':instance}
 
     @wsgi.serializers(xml=AndroidShowTemplate)
     @wsgi.response(201)
     @wsgi.action('deactive')
     def deactive(self, req, id, body):
         context = req.environ['nova.context']
-        instance = {}
-        instance['uuid'] = id
-        self._android_api.deactive(context, instance)
-        LOG.debug(_("custom id %s and body %s "% (id,body)))
-        return {'service':'not implement  custom...id %s body %s'%(id, body)}
+        try:
+            instance = {}
+            instance = self._android_api.get(context,id)
+            self._android_api.deactive(context, instance)
+        except exception.AndroidNotFound as e:
+            raise webob.exc.HTTPNotFound(explanation=e.format_message())
+        return {'android':instance}
 
     @wsgi.serializers(xml=AndroidShowTemplate)
     @wsgi.response(201)
     @wsgi.action('start')
     def start(self, req, id, body):
         context = req.environ['nova.context']
-        instance = {}
-        instance['uuid'] = id
-        self._android_api.start(context, instance)
-        LOG.debug(_("custom id %s and body %s "% (id,body)))
-        return {'service':'not implement  custom...id %s body %s'%(id, body)}
+        try:
+            instance = {}
+            instance = self._android_api.get(context,id)
+            self._android_api.start(context, instance)
+        except exception.AndroidNotFound as e:
+            raise webob.exc.HTTPNotFound(explanation=e.format_message())
+        return {'android':instance}
 
     @wsgi.serializers(xml=AndroidShowTemplate)
     @wsgi.response(201)
     @wsgi.action('stop')
     def stop(self, req, id, body):
         context = req.environ['nova.context']
-        instance = {}
-        instance['uuid'] = id
-        self._android_api.stop(context, instance)
-        LOG.debug(_("custom id %s and body %s "% (id,body)))
-        return {'service':'not implement  custom...id %s body %s'%(id, body)}
+        try:
+            instance = {}
+            instance = self._android_api.get(context,id)
+            self._android_api.stop(context, instance)
+        except exception.AndroidNotFound as e:
+            raise webob.exc.HTTPNotFound(explanation=e.format_message())
+        return {'android':instance}
 
 class AndroidController(object):
 

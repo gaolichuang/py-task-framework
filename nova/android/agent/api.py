@@ -57,7 +57,7 @@ LOG = logging.getLogger(__name__)
 
 
 def check_instance_state(android_state=None, task_state=(None,),
-                         must_have_launched=True):
+                         must_have_launched=False):
     """Decorator to check VM and/or task state before entry to API functions.
 
     If the instance is in the wrong state, or has not been successfully
@@ -84,13 +84,13 @@ def check_instance_state(android_state=None, task_state=(None,),
                     instance_uuid=instance['uuid'],
                     state=instance['task_state'],
                     method=f.__name__)
-            if must_have_launched and not instance['launched_at']:
-                raise exception.InstanceInvalidState(
-                    attr=None,
-                    not_launched=True,
-                    instance_uuid=instance['uuid'],
-                    state=instance['android_state'],
-                    method=f.__name__)
+#            if must_have_launched and not instance['launched_at']:
+#                raise exception.InstanceInvalidState(
+#                    attr='Launched_at',
+#                    not_launched=True,
+#                    instance_uuid=instance['uuid'],
+#                    state=instance['launched_at'],
+#                    method=f.__name__)
 
             return f(self, context, instance, *args, **kw)
         return inner
@@ -124,6 +124,7 @@ class API(object):
         instances = {}
         instances['name'] = name
         instances['verdor'] = verdor
+        instances['android_state'] = rb_status.READY # init variable
         return self._rpcapi.create_android(context,instances)
 
     @check_instance_state(android_state=[rb_status.READY],
@@ -148,7 +149,6 @@ class API(object):
 
     @check_instance_state(android_state=[None,rb_status.WORKING,rb_status.ACTIVE,rb_status.READY],
                           task_state=[None,task_status.DEACTIVING,task_status.STARTING,
-                                      task_status.STOPING],
-                          must_have_launched = False)
+                                      task_status.STOPING])
     def destroy(self, context, instance):
         self._rpcapi.destroy_android(context, instance)

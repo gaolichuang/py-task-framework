@@ -99,6 +99,7 @@ class AndroidManager(manager.Manager):
         LOG.debug(_('android is worked %(instance)s'),
                          {'instance': instance})
         greenthread.sleep(20)
+        instance['launched_at'] = timeutils.utcnow
         self._android_status_update(context, instance, rb_status.WORKING, None)
         LOG.debug(_('android already working %(instance)s'),
                          {'instance': instance})
